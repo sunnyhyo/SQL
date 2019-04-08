@@ -155,3 +155,30 @@ GROUP BY DNO
 HAVING MAX(SALARY) > 500;
 
 -- HAVING, WHERE 함께 사용시 계산 어떻게 되는지?????
+
+
+/* 03 다차원 집계함수의 사용 
+
+- ROLLUP 
+- CUBE */
+
+/* 04 조건에 따라 서로 다른 처리가 가능한 CASE
+- CASE  */
+
+/* 05 PIVOT 과 UNPIVOT 
+- PIVOT 
+- UNPIVOT */
+
+/* 06 RANKS 
+- RANK
+- DENSE_RANK 
+- ROW_NUMBER 
+- NTILE 
+- PARTITION BY */
+
+/* 07 추가된 비교함수
+- IFF 
+- CHOOSE
+- 시퀀스
+*/
+

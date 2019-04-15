@@ -1,0 +1,320 @@
+/* CH10 데이터 무결성과 제약조건 
+
+- 데이터 무결성 제약조건 : 테이블에 부적절한 자료가 입력되는 것을 방지하기 위해서
+  테이블을 생성할 때 각 칼럼에 대해서 정의하는 여러가지 규칙을 말한다. 
+
+- 무결성 : 데이터베이스 내에 데이터의 정확성을 유지하는 것 의미
+- 제약조건 : 바람직하지 않는 데이터가 저장되는 것을 방지하는 것 의미
+
+무결성 제약조건 5가지 
+- NOT NULL : NULL을 허용하지 않는다
+- UNIQUE : 중복된 값을 허용하지 않는다. 항상 유일한 값을 갖도록 한다. 
+- PRIMARY KEY : NULL 허용하지 않음, 중복된 값을 허용하지 않음. NOT NULL + UNIQUE
+- FOREIGN KEY : 참조되는 테이블의 칼럼의 값이 존재하면 허용한다. 
+- CHECK : 저장가능한 데이터의 값의 범위나 조건을 지정하여 설정한 값만을 허용한다. 
+- DEFAULT : 아무런 값을 입력하지 않았을 때 디폴트 값 입력
+*/
+
+-- 제약조건 없이 테이블 생성
+CREATE TABLE CUSTOMER (
+	ID VARCHAR(20), 
+	PWD VARCHAR(20), 
+	NAME VARCHAR(20),
+	PHONE1 VARCHAR(3),
+	PHONE2 VARCHAR(8),
+	BIRTHYEAR INT,
+	ADDRESS VARCHAR(100)
+);
+
+SELECT * FROM CUSTOMER;
+
+-- 데이터 추가 
+INSERT INTO CUSTOMER VALUES(NULL, NULL, NULL, '010', '77727777', 1988, '서울시 성동구 성수동');
+SELECT * FROM CUSTOMER;
+
+-- 칼럼 레벨 정의 방법으로 제약 조건 지정하기 
+DROP TABLE CUSTOMER; 
+CREATE TABLE CUSTOMER (
+	ID VARCHAR(20) NOT NULL, 
+	PWD VARCHAR(20) NOT NULL, 
+	NAME VARCHAR(20) NOT NULL,
+	PHONE1 VARCHAR(3) NULL,
+	PHONE2 VARCHAR(8) NULL,
+	BIRTHYEAR INT NULL,
+	ADDRESS VARCHAR(100) NULL
+);
+INSERT INTO CUSTOMER VALUES(NULL, NULL, NULL, '010', '77727777', 1988, '서울시 성동구 성수동');
+-- ID, PWD, NAME 에 NOT NULL제약조건을 지정했기 때문에 NULL을 추가하는 명령어에서 오류가 발생
+SELECT * FROM CUSTOMER;
+INSERT INTO CUSTOMER VALUES('ONE', '1111', '김나리', '010', '77727777', 1988, '서울시 성동구 성수동')
+SELECT * FROM CUSTOMER;
+
+/* 03 유일한 값만 허용하는 UNIQUE 제약조건 
+  UNIQUE : 특정 칼럼에 대해 자료가 중복되지 않게 하는 것
+  지정된 칼럼에는 유일한 값만 수록되게 한다. 
+  
+  새로운 고객이 회원 가입을 했기 때문에 이 회원의 정보를 입력했는데, 이미 존재하는 회원의 아이디와 동일한 아이디를 사용하려고 한다면 이를 가입 승인해야 하는가? 
+  중복된 값을 지정하면 중복된 값을 저장할 수 없게 된다 
+  */
+
+DROP TABLE CUSTOMER;
+
+CREATE TABLE CUSTOMER(
+	ID VARCHAR(20) UNIQUE, 
+	PWD VARCHAR(20) NOT NULL, 
+	NAME VARCHAR(20) NOT NULL,
+	PHONE1 VARCHAR(3) NULL,
+	PHONE2 VARCHAR(8) NULL,
+	BIRTHYEAR INT NULL,
+	ADDRESS VARCHAR(100) NULL
+);
+
+INSERT INTO CUSTOMER VALUES('ONE', '1111', '김나리', '010', '77727777', 1988, '서울시 성동구 성수동')
+SELECT * FROM CUSTOMER;
+
+INSERT INTO CUSTOMER VALUES('ONE', '2222', '이백합', '010', '12324567', 1979, '서울시 송파구 잠실동')
+SELECT * FROM CUSTOMER;
+
+
+-- 3.1 칼럼 레벨별로 제약조건을 명시해서 제약 조건을 설정하기 
+DROP TABLE CUSTOMER 
+CREATE TABLE CUSTOMER(
+	ID VARCHAR(20) CONSTRAINT UK_ID UNIQUE, 
+	PWD VARCHAR(20) CONSTRAINT NN_PWD NOT NULL, 
+	NAME VARCHAR(20) CONSTRAINT NN_NAMW NOT NULL,
+	PHONE1 VARCHAR(3) NULL,
+	PHONE2 VARCHAR(8) NULL,
+	BIRTHYEAR INT NULL,
+	ADDRESS VARCHAR(100) NULL
+);
+SELECT * FROM CUSTOMER;
+
+INSERT INTO CUSTOMER VALUES('ONE', '1111', '김나리', '010', '77727777', 1988, '서울시 성동구 성수동');
+INSERT INTO CUSTOMER VALUES('ONE', '2222', '이백합', '010', '12324567', 1979, '서울시 송파구 잠실동');
+
+
+/* 04 PRIMARY KEY 제약조건 
+  데이터 구분을 위함 
+  
+  - UNIQUE 제약조건은 중복된 데이터를 저장하는 것은 못하지만, NULL 값을 저장할 수는 있다 
+  동명이인이 입사했다면 구분할 수 있는 유일키수가 있어야 하지만 ID 에 NULL 값이 저장되는 바람에 구분할 수가 없다 
+  
+  테이블 내의 해당 행은 다른 행과 구분 할 수 있도록 하는 칼럼은 반드시 존재해야 한다. 
+  식별기능을 갖는 칼럼은 유일하면서도 NULL 값을 허용하지 말아야 한다. 
+  
+  UNIQUE 제약조건과 NOT NULL 제약조건을 동시에 갖는 PRIMARY KEY 제약 조건 
+  */
+
+DROP TABLE CUSTOMER 
+CREATE TABLE CUSTOMER(
+	ID VARCHAR(20) CONSTRAINT PK_ID PRIMARY KEY, 
+	PWD VARCHAR(20) CONSTRAINT NN_PWD NOT NULL, 
+	NAME VARCHAR(20) CONSTRAINT NN_NAMW NOT NULL,
+	PHONE1 VARCHAR(3) NULL,
+	PHONE2 VARCHAR(8) NULL,
+	BIRTHYEAR INT NULL,
+	ADDRESS VARCHAR(100) NULL
+);
+SELECT * FROM CUSTOMER;
+
+-- UNIQUE 제약조건에 걸림
+INSERT INTO CUSTOMER VALUES('ONE', '1111', '김나리', '010', '77727777', 1988, '서울시 성동구 성수동');
+INSERT INTO CUSTOMER VALUES('ONE', '2222', '이백합', '010', '12324567', 1979, '서울시 송파구 잠실동');
+-- NOT NULL 제약조건에 걸림
+INSERT INTO CUSTOMER VALUES(NULL, '2222', '이백합', '010', '12324567', 1979, '서울시 송파구 잠실동');
+
+
+/* 05 참조 무결성을 위한 FOREIGIN KEY 제약조건
+  - 참조 무결성: 테이블 사이의 관계에서 발생하는 개념. 
+  FOREGIN KEY 는 일반적으로 업무 규칙에서 주종관계가 있는 두 테이블 간에 사용되며 
+  종속되는 테이블의 키 칼럼이 주가 되는 테이블의 PRIMARY KEY 또는 UNIQUE 칼럼을 참조함을 의미함
+
+  부모테이블     자식테이블 
+  PRIMARY KEY    FOREIGIN KEY  
+  (UNIQUE)
+  
+  */
+
+-- 외래키 제약 조건 설정하기 
+-- CUSTOMER 테이블과 관계를 갖는 테이블 설계 
+
+
+CREATE TABLE PRODUCTS (
+	PCODE VARCHAR(20) CONSTRAINT PK_PCODE PRIMARY KEY ,
+	PNAME VARCHAR(100),
+	PRICE INT
+)
+SELECT * FROM PRODUCTS
+
+
+-- 현재 생성하는 ORDERS 테이블의 ID가 CUSTOMER 테이블의 ID 칼럼을 참조하게 외래키 제약조건 설정
+-- 현재 생성하는 ORDERS 테이블의 ID가 PRODUCTS 테이블의 PCODE 칼럼을 참조하게 외래키 제약조건 설정 
+CREATE TABLE ORDERS (
+	OSEQ  INT IDENTITY(1,1) CONSTRAINT PK_OSEQ PRIMARY KEY,
+	QUANTITY VARCHAR(20) NULL,
+	INDATE DATETIME NULL,
+	ID VARCHAR(20) CONSTRAINT FK_ID REFERENCES CUSTOMER(ID),
+	PCODE VARCHAR(20) CONSTRAINT FK_PCODE REFERENCES PRODUCTS(PCODE) 
+)
+
+
+-- PRODUCTS 테이블에 데이터 추가
+INSERT INTO PRODUCTS VALUES('P1', '바지', 55000)
+INSERT INTO PRODUCTS VALUES('P2', '점버', 58000)
+INSERT INTO PRODUCTS VALUES('P3', '니트', 53000)
+SELECT * FROM PRODUCTS
+
+-- CUSTOMER 테이블에 데이터 추가 
+INSERT INTO CUSTOMER VALUES('TWO', '2222', '이백합', '010', '12324567', 1979, '서울시 성동구 잠실동')
+SELECT * FROM CUSTOMER
+
+-- ONE 이랑 아이디의 고객이 바지를 하나 주문했을 경우. 주문테이블에 데이터 추가 
+INSERT INTO ORDERS(QUANTITY, ID, PCODE) VALUES(5, 'ONE', 'P1')
+SELECT * FROM ORDERS
+
+-- 현재 CUSTOMER 테이블에 존재하지 않는 아이디를 갖는 고객이 주문을 했다고 가정
+INSERT INTO ORDERS(QUANTITY, ID, PCODE) VALUES(5, 'TEST', 'P1')
+
+
+/* 06 값의 범위 설정하는 CHECK 제약조건 
+  입력되는 값을 체크하여 설정된 값 이외의 값이 들어오면 오류 메시지와 함께 명령이 수행되지 못하게 하는 것 
+  조건으로 데이터의 값의 범위ㅏ 특정 패턴의 숫자나 문자 값을 설정할 수 있다. 
+  */
+  DROP TABLE CUSTOMER2
+CREATE TABLE CUSTOMER2(
+	ID	VARCHAR(20) CONSTRAINT PK_ID2 PRIMARY KEY,
+	PWD	VARCHAR(20) NOT NULL, 
+	NAME VARCHAR(20) NOT NULL, 
+	PHONE1 VARCHAR(3) NULL
+	CHECK(PHONE1 IN('010', '011', '016', '017', '018', '019')),
+	PHONE2 VARCHAR(8) NULL, 
+	BIRTHYEAR INT NULL
+	CHECK(BIRTHYEAR >= 1900 AND BIRTHYEAR <= YEAR(GETDATE())),
+	ADDRESS VARCHAR(100) NULL
+);
+SELECT * FROM CUSTOMER2;
+
+-- 데이터 추가 
+INSERT INTO CUSTOMER2 VALUES('THREE', '3333', '김장미', '000', '32127654', 1982, '서울시 강남구 압구정동')
+-- 국번이 범위 외 ㅇ값
+INSERT INTO CUSTOMER2 VALUES('THREE', '3333', '김장미', '010', '32127654', 1882, '서울시 강남구 압구정동')
+INSERT INTO CUSTOMER2 VALUES('THREE', '3333', '김장미', '010', '32127654', 1982, '서울시 강남구 압구정동')
+SELECT * FROM CUSTOMER2;
+
+
+/* 07 DEFUALT 제약조건
+
+수량을 입력하지 않으면 디폴트로 1이 출력되고, 주문일자를 입력하지 않으면 오늘 날짜를 디폴트로 입력한다 */
+
+CREATE TABLE ORDER2(
+	ID	VARCHAR(20) NOT NULL,
+	PCODE VARCHAR(20) NOT NULL,
+	OSEQ INT IDENTITY, 
+	QUANTITY VARCHAR(20) NULL DEFAULT '1',
+	INDATE DATETIME NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+SELECT * FROM ORDER2
+INSERT INTO ORDER2(ID, PCODE) VALUES('ONE', 'P1')
+INSERT INTO ORDER2(ID, PCODE) VALUES('TWO', 'P2')
+SELECT * FROM ORDER2
+
+
+/* 08 테이블 레벨 제약 조건 지정하기 
+
+칼럼을 모두 정의하고 나서 테이블 정의를 마무리 짓기 전에 따로 생성된 칼럼들에 대한 제약 조건을 한꺼번에 지정하는 것
+- 복함 키로 기본 키를 지정할 경우 : 복합 키 (2개 이상의 칼럼이 하나의 기본 키를 구성하는 것) 칼럼방식이 아니라 테이블 레벨 방식 지정
+- ALTER TABLE 로 제약조건을 추가 할 때 : 테이블의 정의가 완료되어서 테이블의 구조가 결정된 후에 나중에 테이블에 제약 조건을 추가할때
+테이블 레벨 방식으로 제약 조건을 지정해야한다. 
+*/
+
+-- 컬럼 레벨로 제약조건 지정하기 
+-- 컬럼을 정의하면서 제약조건을 지정
+
+CREATE TABLE ORDER3 (
+	OSEQ	INT IDENTITY(1,1) CONSTRAINT PD_OSEQ3 PRIMARY KEY, 
+	QUENTITY	VARCHAR(20) NULL,
+	INDATE		DATETIME NULL, 
+	ID			VARCHAR(20) CONSTRAINT FK_ID3 REFERENCES CUSTOMER(ID), 
+	PCODE		VARCHAR(20) CONSTRAINT FK_PCODE3 REFERENCES PRODUCTS(PCODE)
+);
+
+-- 테이블 레벨 방식 제약조건 지정하기
+
+CREATE TABLE ORDER4(
+	-- 칼럼 정의 
+	OSEQ INT IDENTITY(1,1), 
+	QUANTITY VARCHAR(20) NULL, 
+	INDATE DATETIME NULL, 
+	ID VARCHAR(20),
+	PCODE VARCHAR(20),
+
+	-- 테이블 레벨 방식 제약조건 지정
+	CONSTRAINT PK_OSEQ4 PRIMARY KEY(OSEQ),
+	CONSTRAINT FK_ID4 FOREIGN KEY(ID) REFERENCES CUSTOMER(ID), 
+	CONSTRAINT FK_PCODE4 FOREIGN KEY(PCODE) REFERENCES PRODUCTS(PCODE)
+);
+SELECT * FROM ORDER4;
+
+
+-- 복합 키를 기본 키로 지정 (이름 + 핸드폰번호)
+
+CREATE TABLE CUSTOMER3(
+	NAME VARCHAR(20), 
+	PHONE VARCHAR(11), 
+	BIRTHDAY DATETIME, 
+	ADDRESS VARCHAR(100),
+	
+	CONSTRAINT CUSTOMER3_COMBO_PK PRIMARY KEY(NAME, PHONE)
+);
+
+SELECT * FROM CUSTOMER3;
+
+/* 09 제약 조건 변경하기 
+이미 존재하는 테이블에 제약 조건 추가, 삭제, 변경 
+
+제약조건 추가
+ALTER TABLE table_name 
+ADD [CONSTRAINT constraint_name ] constraint_type (column_name ) 
+
+제약조건 제거
+ALTER TABLE table_name 
+DROP [CONSTRAINT constraint_name]  */
+
+CREATE TABLE ORDERS5(
+	OSEQ INT IDENTITY(1,1) ,
+	QUANTITY VARCHAR(20) NULL, 
+	INDATE DATETIME NULL, 
+	ID VARCHAR(20), 
+	PCODE VARCHAR(20)
+);
+SELECT * FROM ORDERS5;
+
+-- OSEQ 칼럼에 기본 키 설정
+ALTER TABLE ORDERS5
+ADD CONSTRAINT PK_OSEQ5 PRIMARY KEY(OSEQ)
+
+-- ID 칼럼에 외래 키 설정
+ALTER TABLE ORDERS5
+ADD CONSTRAINT FK_ID5 FOREIGN KEY(ID) REFERENCES CUSTOMER(ID)
+
+-- 제약 조건을 제거
+ALTER TABLE ORDERS5
+DROP CONSTRAINT FK_ID5
+
+
+
+-- 연습문제 
+CREATE TABLE EMPLOYEE_TEST(
+	ENO INT NOT NULL,
+	ENAME VARCHAR(20) NOT NULL,
+	JOB VARCHAR(20) NULL,
+	DNO INT NOT NULL
+) ;
+
+ALTER TABLE EMPLOYEE_TEST
+ADD CONSTRAINT PK_ENO PRIMARY KEY(ENO)
+
+ALTER TABLE EMPLOYEE_TEST
+ADD CONSTRAINT FK_DNO FOREIGN KEY(DNO) REFERENCES DEPARTMENT(DNO)
+
